@@ -27,8 +27,8 @@
         <div id="Total_Vaccinated"></div>
         <br><br>
         <div id="button_wrapper">
-            <button type="button" onclick=weekly_info({cum_perc:true,user_week:-1})>Cumulative</button>
-            <button type="button" onclick=weekly_info({cum_perc:false,user_week:-1})>Percentage</button>
+            <button type="button" onclick=weekly_info({get_data:false,cum_perc:true,user_week:-1})>Cumulative</button>
+            <button type="button" onclick=weekly_info({get_data:false,cum_perc:false,user_week:-1})>Percentage</button>
         </div>
         <br><br>
         <div id="Vacced_by_age"></div>
@@ -36,11 +36,63 @@
 
         <!--Part 3 and 4 - View vaccine data by county-->
         <h2>County Information</h2>
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="dropdown">
+                    <p>Select a county:</p>
+                    <button class="dropbtn">County 1 Dropdown Menu</button>
+                    <div class="dropdown-content" id="dropdown_county_1"></div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="dropdown">
+                    <p>Select a county:</p>
+                    <button class="dropbtn">County 2 Dropdown Menu</button>
+                    <div class="dropdown-content" id="dropdown_county_2"></div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="dropdown">
+                    <p>Select a county:</p>
+                    <button class="dropbtn">County 3 Dropdown Menu</button>
+                    <div class="dropdown-content" id="dropdown_county_3"></div>
+                </div>
+            </div>
+        </div>
+        <br><br>
+        <table cellpadding=10>
+            <tr>
+                <th>County Number</th>
+                <th>County Name</th>
+                <th>County Population</th>
+                <th>Confirmed COVID cases</th>
+                <th>Population proportional COVID cases</th>
+                <th>Cases per 100,000 people</th>
+            </tr>
+            <tr id="county_1"></tr>
+            <tr id="county_2"></tr>
+            <tr id="county_3"></tr>
+        </table>
+        <br>
 
+        <div class="row">
+            <div class="col-sm-6">
+                <p>County with the highest cases per 100,000 people:</p>
+                <p id="max_county"></p>
+                <p>Cases per 100,000 people:</p>
+                <p id="max_value"></p>
+            </div>
+            <div class="col-sm-6">
+                <p>County with the lowest cases per 100,000 people:</p>
+                <p id="min_county"></p>
+                <p>Cases per 100,000 people:</p>
+                <p id="min_value"></p>
+            </div>
+        </div>
     </div>
     
     <script src="index.js"></script>
-    <script>weekly_info({cum_perc:true,user_week:-1})</script>
-    <script>county_info()</script>
+    <script>weekly_info({get_data:true,cum_perc:true,user_week:-1})</script>
+    <script>county_info({row_num:false,county_name:false})</script>
 </body>
 </html>

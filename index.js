@@ -1,5 +1,9 @@
 // Show weekly vaccination information and cumulative vaccination figures
 function weekly_info(args){
+    // Get data used to ensure that toggling the cum/perc button doesn't result in a re-population of the vaccine type table
+    // User week is used to ensure that we are targetting the week selected by the user (most recent week by default)
+    // Cum_perc allows us to toggle between cumulative and percentage data in the age table
+    var get_data = args.get_data
     var user_week = args.user_week
     var cum_perc = args.cum_perc
 
@@ -18,7 +22,7 @@ function weekly_info(args){
             // Create the dropdown menu
             var dropdown_content = "";
             for (i = 0; i < features.length; i++) {
-                dropdown_content += "<button type=\"button\" onclick=weekly_info({cum_perc:true,user_week:" + i + "})>Week " + i + " (" + dates[i] + ") </button>"
+                dropdown_content += "<button type=\"button\" onclick=weekly_info({get_data:true,cum_perc:true,user_week:" + i + "})>Week " + i + " (" + dates[i] + ") </button>"
             }
 
             document.getElementById("dropdown-week").innerHTML = dropdown_content
@@ -48,7 +52,12 @@ function weekly_info(args){
                 document.getElementById("week_tracker").innerHTML = user_week
             }
             
-            vax_total(features, user_week);
+            // This condition evaluates to false when we don't want to repopulate the first table (vaccine types and totals)
+            if (get_data===true) {
+                vax_total(features, user_week);
+            }
+
+            by_age(features, user_week)
         }
     };
     
@@ -78,18 +87,21 @@ function weekly_info(args){
             total_vaccinated += attributes.TotalweeklyVaccines
         }
 
-        var this_week = [attributes.TotalweeklyVaccines, attributes.Moderna, attributes.Pfizer, attributes.Janssen, attributes.AstraZeneca]
+        this_week = response[user_week].attributes
+        var this_week_values = [this_week.TotalweeklyVaccines, this_week.Moderna, this_week.Pfizer, this_week.Janssen, this_week.AstraZeneca]
         text += "<tr align=center><td>" + total_vaccinated + "</td>";
 
         // Add the cumulative figures to the table
-        for (j = 0; j < this_week.length; j++){
-            text += "<td>" + this_week[j] + "</td>"
+        for (j = 0; j < this_week_values.length; j++){
+            text += "<td>" + this_week_values[j] + "</td>"
         }
 
         text += "</tr></table>"
         
         document.getElementById("Total_Vaccinated").innerHTML = text
+    }
 
+    function by_age(response, user_week) {
         var age_text = "";
 
         age_text += "<table border=1 cellpadding=10>" + 
@@ -107,24 +119,26 @@ function weekly_info(args){
 
         // Get cumulative age data
         if (cum_perc) {
-            var this_week_age = [attributes.FullyCum_Age10to19, attributes.FullyCum_Age20to29, attributes.FullyCum_Age30to39, attributes.FullyCum_Age40to49, 
-                attributes.FullyCum_Age50to59, attributes.FullyCum_Age60to69, attributes.FullyCum_Age70to79, attributes.FullyCum_80_]
+            var this_week_age = response[user_week].attributes
+            var this_week_age_values = [this_week_age.FullyCum_Age10to19, this_week_age.FullyCum_Age20to29, this_week_age.FullyCum_Age30to39, this_week_age.FullyCum_Age40to49, 
+                this_week_age.FullyCum_Age50to59, this_week_age.FullyCum_Age60to69, this_week_age.FullyCum_Age70to79, this_week_age.FullyCum_80_]
 
             // Add the cumulative figures to the table
-            for (j = 0; j < this_week_age.length; j++){
-                age_text += "<td>" + this_week_age[j] + "</td>"
+            for (j = 0; j < this_week_age_values.length; j++){
+                age_text += "<td>" + this_week_age_values[j] + "</td>"
             }
 
         } 
         
         // Get percentage age data
         else {
-            var this_week_age = [attributes.FullyPer_Age10to19, attributes.FullyPer_Age20to29, attributes.FullyPer_Age30to39, attributes.FullyPer_Age40to49, 
-                attributes.FullyPer_Age50to59, attributes.FullyPer_Age60to69, attributes.FullyPer_Age70to79, attributes.FullyPer_80_]
+            var this_week_age = response[user_week].attributes
+            var this_week_age_values = [this_week_age.FullyPer_Age10to19, this_week_age.FullyPer_Age20to29, this_week_age.FullyPer_Age30to39, this_week_age.FullyPer_Age40to49, 
+                this_week_age.FullyPer_Age50to59, this_week_age.FullyPer_Age60to69, this_week_age.FullyPer_Age70to79, this_week_age.FullyPer_80_]
 
             // Add the percent figures to the table
-            for (j = 0; j < this_week_age.length; j++){
-                age_text += "<td>" + Math.round(this_week_age[j] * 100) + "% </td>"
+            for (j = 0; j < this_week_age_values.length; j++){
+                age_text += "<td>" + Math.round(this_week_age_values[j] * 100) + "% </td>"
             }
 
         }
@@ -138,6 +152,9 @@ function weekly_info(args){
 
 // Show weekly vaccination information and cumulative vaccination figures
 function county_info(args){
+    // Args will be 2 values, a county name and a row number
+    row_num = args.row_num
+    county_name = args.county_name
 
     // Get the JSON data
     var xmlhttp = new XMLHttpRequest();
@@ -148,10 +165,87 @@ function county_info(args){
             
             //Parse the JSON data to a JavaScript variable. 
             var parsedJSON = JSON.parse(xmlhttp.responseText);  
-            var features = parsedJSON.features;  
-            var attributes = features[0].attributes
+            var features = parsedJSON.features
+
+            // Slice the features to account for double entries (ech county appears twice in the data)
+            var sliced_features = Object.fromEntries(
+                Object.entries(features).slice(0, features.length / 2)
+            ) 
+
+            var sliced_length = features.length / 2
+
+            // Get a list of county names and cases per 100000
+            // Also get the index of the county provided as an argument to the function
+            var county_names = Array();
+            var per_hundred_thousand = Array()
+            var selected_county_index = 0;
+            
+            for (i = 0; i < sliced_length; i++){
+                var attributes = sliced_features[i].attributes
+                county_names.push(attributes.CountyName)
+                per_hundred_thousand.push(attributes.ConfirmedCovidCases / 100000)
+                if (attributes.CountyName === county_name) {
+                    selected_county_index = i
+                }
+            }
+
+            // Create dropdown menus 
+            create_dropdowns(county_names, sliced_features, sliced_length);
+            
+            // Insert the required data
+            insert_data(sliced_features, selected_county_index, per_hundred_thousand)
+            
+
+            // Get highest number of cases per 10000 people
+            var max_value = Math.max(...per_hundred_thousand)
+            var max_index = per_hundred_thousand.indexOf(max_value)
+            var max_county = county_names[max_index]
+
+            document.getElementById("max_county").innerHTML = max_county
+            document.getElementById("max_value").innerHTML = max_value
+
+            // Get lowest number of cases per 100000 people
+            var min_value = Math.min(...per_hundred_thousand)
+            var min_index = per_hundred_thousand.indexOf(min_value)
+            var min_county = county_names[min_index]
+
+            document.getElementById("min_county").innerHTML = min_county
+            document.getElementById("min_value").innerHTML = min_value
         }
     };
+
+    function create_dropdowns(county_names, sliced_features, sliced_length){
+        // Loop through 1-3, get element by id for each dropdown content, each should have a button with arguments county name and row number
+        for (i = 1; i < 4; i++) {
+            var dropdown_content = "";
+            for (j = 0; j < sliced_length; j++) {
+                dropdown_content += "<button type=\"button\" onclick=county_info({row_num:" + 
+                i + ",county_name:\"" + county_names[j] + "\"})>" + county_names[j] + "</button>"
+            }
+
+            var row_name = "dropdown_county_" + i
+            document.getElementById(row_name).innerHTML = dropdown_content;
+        }
+    }
+
+    function insert_data(sliced_features, selected_county_index, per_hundred_thousand){
+        // Get the element by id using county_row_num
+        // Find the county's feature by looping through the features and storing the index when there's a match
+        // Then, find the rest of the data for that county and but it in a td inside the tr selected
+        if (county_name) {
+            var store_text = "";
+            var table_row_name = "county_" + row_num;
+            document.getElementById(table_row_name).innerHTML = "";
+
+            var info = sliced_features[selected_county_index].attributes;
+            var data = [row_num, info.CountyName, info.PopulationCensus16, info.ConfirmedCovidCases, info.PopulationProportionCovidCases, per_hundred_thousand[selected_county_index]];
+            for (i = 0; i < data.length; i++){
+                store_text += "<td>" + data[i] + "</td>"
+            }
+            
+            document.getElementById(table_row_name).innerHTML = store_text;
+        }
+    }
     
     xmlhttp.open("GET", url, true);
     xmlhttp.send();
