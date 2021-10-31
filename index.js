@@ -165,6 +165,22 @@ function weekly_info(args){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Part 3 & 4
 // Show weekly vaccination information and cumulative vaccination figures
 function county_info(args){
