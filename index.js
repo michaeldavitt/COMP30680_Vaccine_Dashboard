@@ -1,3 +1,5 @@
+
+// Part 1 & 2
 // Show weekly vaccination information and cumulative vaccination figures
 function weekly_info(args){
     // Get data used to ensure that toggling the cum/perc button doesn't result in a re-population of the vaccine type table
@@ -20,12 +22,7 @@ function weekly_info(args){
             var features = parsedJSON.features;  
 
             // Create the dropdown menu
-            var dropdown_content = "";
-            for (i = 0; i < features.length; i++) {
-                dropdown_content += "<button type=\"button\" onclick=weekly_info({get_data:true,cum_perc:true,user_week:" + i + "})>Week " + i + " (" + dates[i] + ") </button>"
-            }
-
-            document.getElementById("dropdown-week").innerHTML = dropdown_content
+            get_dropdown(features)
 
 
             // This is to ensure that the page automatically displays the information for the most recent week when first loaded
@@ -64,6 +61,15 @@ function weekly_info(args){
     xmlhttp.open("GET", url, true);
     xmlhttp.send();
 
+    function get_dropdown(features){
+        var dropdown_content = "";
+        for (i = 0; i < features.length; i++) {
+            dropdown_content += "<button type=\"button\" onclick=weekly_info({get_data:true,cum_perc:true,user_week:" + i + "})>Week " + i + " (" + dates[i] + ") </button>"
+        }
+
+        document.getElementById("dropdown-week").innerHTML = dropdown_content
+    }
+
     // Generates a table containing vaccination information
     function vax_total(response, user_week) {
         var total_vaccinated = 0;
@@ -89,11 +95,11 @@ function weekly_info(args){
 
         this_week = response[user_week].attributes
         var this_week_values = [this_week.TotalweeklyVaccines, this_week.Moderna, this_week.Pfizer, this_week.Janssen, this_week.AstraZeneca]
-        text += "<tr align=center><td>" + total_vaccinated + "</td>";
+        text += "<tr align=center><td>" + numberWithCommas(total_vaccinated) + "</td>";
 
         // Add the cumulative figures to the table
         for (j = 0; j < this_week_values.length; j++){
-            text += "<td>" + this_week_values[j] + "</td>"
+            text += "<td>" + numberWithCommas(this_week_values[j]) + "</td>"
         }
 
         text += "</tr></table>"
@@ -125,7 +131,13 @@ function weekly_info(args){
 
             // Add the cumulative figures to the table
             for (j = 0; j < this_week_age_values.length; j++){
-                age_text += "<td>" + this_week_age_values[j] + "</td>"
+
+                // Output is zero in the case where we have null data
+                if (this_week_age_values[j] === null) {
+                    age_text += "<td>" + 0 + "</td>"
+                } else {
+                    age_text += "<td>" + numberWithCommas(this_week_age_values[j]) + "</td>"
+                }
             }
 
         } 
@@ -138,7 +150,7 @@ function weekly_info(args){
 
             // Add the percent figures to the table
             for (j = 0; j < this_week_age_values.length; j++){
-                age_text += "<td>" + Math.round(this_week_age_values[j] * 100) + "% </td>"
+                age_text += "<td>" + Math.round((this_week_age_values[j] + Number.EPSILON) * 10000) / 100 + "% </td>"
             }
 
         }
@@ -150,6 +162,10 @@ function weekly_info(args){
 }
 
 
+
+
+
+// Part 3 & 4
 // Show weekly vaccination information and cumulative vaccination figures
 function county_info(args){
     // Args will be 2 values, a county name and a row number
@@ -158,7 +174,7 @@ function county_info(args){
 
     // Get the JSON data
     var xmlhttp = new XMLHttpRequest();
-    var url = "https://services1.arcgis.com/eNO7HHeQ3rUcBllm/arcgis/rest/services/Covid19CountyStatisticsHPSCIrelandOpenData/FeatureServer/0/query?where=1%3D1&outFields=CountyName,PopulationCensus16,ConfirmedCovidCases,PopulationProportionCovidCases&returnGeometry=false&outSR=4326&f=json"
+    var url = "https://services1.arcgis.com/eNO7HHeQ3rUcBllm/arcgis/rest/services/Covid19CountyStatisticsHPSCIrelandOpenData/FeatureServer/0/query?where=1%3D1&outFields=PopulationProportionCovidCases,PopulationCensus16,ConfirmedCovidCases,CountyName&returnGeometry=false&outSR=4326&f=json" 
 
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -167,12 +183,12 @@ function county_info(args){
             var parsedJSON = JSON.parse(xmlhttp.responseText);  
             var features = parsedJSON.features
 
-            // Slice the features to account for double entries (ech county appears twice in the data)
+            // Slice the features to account for double entries (each county appears twice in the data)
             var sliced_features = Object.fromEntries(
-                Object.entries(features).slice(0, features.length / 2)
+                Object.entries(features).slice(0, 26)
             ) 
 
-            var sliced_length = features.length / 2
+            var sliced_length = 26
 
             // Get a list of county names and cases per 100000
             // Also get the index of the county provided as an argument to the function
@@ -183,38 +199,31 @@ function county_info(args){
             for (i = 0; i < sliced_length; i++){
                 var attributes = sliced_features[i].attributes
                 county_names.push(attributes.CountyName)
-                per_hundred_thousand.push(attributes.ConfirmedCovidCases / 100000)
+                per_hundred_thousand.push( Math.round( (attributes.PopulationProportionCovidCases + Number.EPSILON) * 100 ) / 100 )
+
+                // Find the index of the county we are interested in for data extraction
                 if (attributes.CountyName === county_name) {
                     selected_county_index = i
                 }
             }
 
             // Create dropdown menus 
-            create_dropdowns(county_names, sliced_features, sliced_length);
+            create_dropdowns(county_names, sliced_length);
             
             // Insert the required data
             insert_data(sliced_features, selected_county_index, per_hundred_thousand)
             
 
             // Get highest number of cases per 10000 people
-            var max_value = Math.max(...per_hundred_thousand)
-            var max_index = per_hundred_thousand.indexOf(max_value)
-            var max_county = county_names[max_index]
-
-            document.getElementById("max_county").innerHTML = max_county
-            document.getElementById("max_value").innerHTML = max_value
+            get_max(per_hundred_thousand, county_names)
+            
 
             // Get lowest number of cases per 100000 people
-            var min_value = Math.min(...per_hundred_thousand)
-            var min_index = per_hundred_thousand.indexOf(min_value)
-            var min_county = county_names[min_index]
-
-            document.getElementById("min_county").innerHTML = min_county
-            document.getElementById("min_value").innerHTML = min_value
+            get_min(per_hundred_thousand, county_names)
         }
     };
 
-    function create_dropdowns(county_names, sliced_features, sliced_length){
+    function create_dropdowns(county_names, sliced_length){
         // Loop through 1-3, get element by id for each dropdown content, each should have a button with arguments county name and row number
         for (i = 1; i < 4; i++) {
             var dropdown_content = "";
@@ -238,7 +247,8 @@ function county_info(args){
             document.getElementById(table_row_name).innerHTML = "";
 
             var info = sliced_features[selected_county_index].attributes;
-            var data = [row_num, info.CountyName, info.PopulationCensus16, info.ConfirmedCovidCases, info.PopulationProportionCovidCases, per_hundred_thousand[selected_county_index]];
+            var data = [row_num, info.CountyName, numberWithCommas(info.PopulationCensus16), 
+                numberWithCommas(info.ConfirmedCovidCases), per_hundred_thousand[selected_county_index]];
             for (i = 0; i < data.length; i++){
                 store_text += "<td>" + data[i] + "</td>"
             }
@@ -246,9 +256,30 @@ function county_info(args){
             document.getElementById(table_row_name).innerHTML = store_text;
         }
     }
+
+    function get_max(per_hundred_thousand, county_names){
+        var max_value = Math.max(...per_hundred_thousand)
+        var max_index = per_hundred_thousand.indexOf(max_value)
+        var max_county = county_names[max_index]
+
+        document.getElementById("max_county").innerHTML = max_county + " (" + max_value + " cases per 100,000 people)"
+    }
+
+    function get_min(per_hundred_thousand, county_names){
+        var min_value = Math.min(...per_hundred_thousand)
+        var min_index = per_hundred_thousand.indexOf(min_value)
+        var min_county = county_names[min_index]
+
+        document.getElementById("min_county").innerHTML = min_county + " (" + min_value + " cases per 100,000 people)"
+    }
     
     xmlhttp.open("GET", url, true);
     xmlhttp.send();
+}
+
+// Reference: https://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
+function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 // Date ranges required to construct the dropdown menu from Part 1

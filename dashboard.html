@@ -11,88 +11,86 @@
 </head>
 <body>
     <div class="container">
-        <h1>COVID Vaccination Dashboard</h1>
+        <header>
+            <h1>COVID Vaccination Dashboard</h1>
+        </header>
 
-        <!--Part 1 and 2 - View vaccine data by type and age-->
-        <h2>Weekly Information</h2>
+        <section>
+            <!--Part 1 and 2 - View vaccine data by type and age-->
+            <h2>Weekly Information</h2>
 
-        <!--Dropdown menu reference: https://www.w3schools.com/css/css_dropdowns.asp-->
-        <div class="dropdown">
-            <p>Please select the week number that you wish to gain information for:</p>
-            <button class="dropbtn">Week Dropdown Menu</button>
-            <div class="dropdown-content" id="dropdown-week"></div>
-        </div>
-        <br><br>    
-        <p>Week <span id="week_tracker">-1</span></p>
-        <div id="Total_Vaccinated"></div>
-        <br><br>
-        <div id="button_wrapper">
-            <button type="button" onclick=weekly_info({get_data:false,cum_perc:true,user_week:-1})>Cumulative</button>
-            <button type="button" onclick=weekly_info({get_data:false,cum_perc:false,user_week:-1})>Percentage</button>
-        </div>
-        <br><br>
-        <div id="Vacced_by_age"></div>
-        <br>
-
-        <!--Part 3 and 4 - View vaccine data by county-->
-        <h2>County Information</h2>
-        <div class="row">
-            <div class="col-sm-4">
-                <div class="dropdown">
-                    <p>Select a county:</p>
-                    <button class="dropbtn">County 1 Dropdown Menu</button>
-                    <div class="dropdown-content" id="dropdown_county_1"></div>
+            <!--Dropdown menu reference: https://www.w3schools.com/css/css_dropdowns.asp-->
+            <div class="dropdown">
+                <p>Please select the week number that you wish to gain information for:</p>
+                <button class="dropbtn">Week Dropdown Menu</button>
+                <div class="dropdown-content" id="dropdown-week"></div>
+            </div>  
+            <p>Week <span id="week_tracker">-1</span></p>
+            <div id="Total_Vaccinated" class="table_wrapper"></div>
+            <div id="button_wrapper">
+                <button type="button" onclick=weekly_info({get_data:false,cum_perc:true,user_week:-1})>Cumulative</button>
+                <button type="button" onclick=weekly_info({get_data:false,cum_perc:false,user_week:-1})>Percentage</button>
+            </div>
+            <div id="Vacced_by_age" class="table_wrapper"></div>
+        </section>
+        
+        <section>
+            <!--Part 3 and 4 - View vaccine data by county-->
+            <h2>County Information</h2>
+            <div class="row">
+                <div class="col-sm-12 col-md-4">
+                    <div class="dropdown">
+                        <p>Select a county:</p>
+                        <button class="dropbtn">County 1 Dropdown Menu</button>
+                        <div class="dropdown-content" id="dropdown_county_1"></div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-4">
+                    <div class="dropdown">
+                        <p>Select a county:</p>
+                        <button class="dropbtn">County 2 Dropdown Menu</button>
+                        <div class="dropdown-content" id="dropdown_county_2"></div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-4">
+                    <div class="dropdown">
+                        <p>Select a county:</p>
+                        <button class="dropbtn">County 3 Dropdown Menu</button>
+                        <div class="dropdown-content" id="dropdown_county_3"></div>
+                    </div>
                 </div>
             </div>
-            <div class="col-sm-4">
-                <div class="dropdown">
-                    <p>Select a county:</p>
-                    <button class="dropbtn">County 2 Dropdown Menu</button>
-                    <div class="dropdown-content" id="dropdown_county_2"></div>
+            
+            <div class="table_wrapper">
+                <table cellpadding=10>
+                    <tr>
+                        <th>County Number</th>
+                        <th>County Name</th>
+                        <th>County Population</th>
+                        <th>Confirmed COVID cases</th>
+                        <th>Cases per 100,000 people</th>
+                    </tr>
+                    <tr id="county_1"></tr>
+                    <tr id="county_2"></tr>
+                    <tr id="county_3"></tr>
+                </table>
+            </div>
+            
+            <div class="row">
+                <div class="col-sm-6">
+                    <p>County with the highest cases per 100,000 people:</p>
+                    <p id="max_county"></p>
+                </div>
+                <div class="col-sm-6">
+                    <p>County with the lowest cases per 100,000 people:</p>
+                    <p id="min_county"></p>
                 </div>
             </div>
-            <div class="col-sm-4">
-                <div class="dropdown">
-                    <p>Select a county:</p>
-                    <button class="dropbtn">County 3 Dropdown Menu</button>
-                    <div class="dropdown-content" id="dropdown_county_3"></div>
-                </div>
-            </div>
-        </div>
-        <br><br>
-        <table cellpadding=10>
-            <tr>
-                <th>County Number</th>
-                <th>County Name</th>
-                <th>County Population</th>
-                <th>Confirmed COVID cases</th>
-                <th>Population proportional COVID cases</th>
-                <th>Cases per 100,000 people</th>
-            </tr>
-            <tr id="county_1"></tr>
-            <tr id="county_2"></tr>
-            <tr id="county_3"></tr>
-        </table>
-        <br>
-
-        <div class="row">
-            <div class="col-sm-6">
-                <p>County with the highest cases per 100,000 people:</p>
-                <p id="max_county"></p>
-                <p>Cases per 100,000 people:</p>
-                <p id="max_value"></p>
-            </div>
-            <div class="col-sm-6">
-                <p>County with the lowest cases per 100,000 people:</p>
-                <p id="min_county"></p>
-                <p>Cases per 100,000 people:</p>
-                <p id="min_value"></p>
-            </div>
-        </div>
+        </section>
     </div>
-    
+
     <script src="index.js"></script>
     <script>weekly_info({get_data:true,cum_perc:true,user_week:-1})</script>
-    <script>county_info({row_num:false,county_name:false})</script>
+    <script>county_info({row_num:1,county_name:"Carlow"})</script>
 </body>
 </html>

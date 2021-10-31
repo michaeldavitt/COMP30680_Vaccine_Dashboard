@@ -1,6 +1,21 @@
+.table_wrapper {
+  overflow: auto;
+}
+
+table {
+  width: 100%;
+}
+
 td, th {
     border: 1px solid black;
+    text-align: center;
 }
+
+section, div {
+  padding: 10px 0;
+  text-align: center;
+}
+
 
 
 /* Dropdown menu reference: https://www.w3schools.com/css/css_dropdowns.asp */
@@ -12,6 +27,7 @@ td, th {
     border: none;
     cursor: pointer;
     border-radius: 10px;
+    width: 200px;
   }
   
   .dropdown {
@@ -22,6 +38,7 @@ td, th {
   .dropdown-content {
     display: none;
     position: absolute;
+    width: 100%;
     background-color: #f9f9f9;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 1;
@@ -32,7 +49,7 @@ td, th {
   .dropdown-content button {
     color: black;
     padding: 12px 16px;
-    min-width: 450px;
+    width: 100%;
     text-decoration: none;
     display: block;
   }
