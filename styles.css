@@ -35,13 +35,14 @@ header {
 }
 
 .week-section {
-  padding: 50px;
+  padding: 30px;
 }
 
 .county-section {
-  padding: 50px;
+  padding: 30px;
   background-color: #e9eae8;
 }
+
 h1 {
   padding: 20px;
 }

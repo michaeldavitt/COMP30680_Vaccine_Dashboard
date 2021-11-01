@@ -199,12 +199,8 @@ function county_info(args){
             var parsedJSON = JSON.parse(xmlhttp.responseText);  
             var features = parsedJSON.features
 
-            // Slice the features to account for double entries (each county appears twice in the data)
-            var sliced_features = Object.fromEntries(
-                Object.entries(features).slice(0, 26)
-            ) 
-
-            var sliced_length = 26
+            // Slice the features to account for duplicate entries (each county appears twice in the data)
+            var sliced_features = slice_data(features)
 
             // Get a list of county names and cases per 100000
             // Also get the index of the county provided as an argument to the function
@@ -212,7 +208,7 @@ function county_info(args){
             var per_hundred_thousand = Array()
             var selected_county_index = 0;
             
-            for (i = 0; i < sliced_length; i++){
+            for (i = 0; i < sliced_features.length; i++){
                 var attributes = sliced_features[i].attributes
                 county_names.push(attributes.CountyName)
                 per_hundred_thousand.push( Math.round( (attributes.PopulationProportionCovidCases + Number.EPSILON) * 100 ) / 100 )
@@ -224,7 +220,7 @@ function county_info(args){
             }
 
             // Create dropdown menus 
-            create_dropdowns(county_names, sliced_length);
+            create_dropdowns(county_names, sliced_features);
             
             // Insert the required data
             insert_data(sliced_features, selected_county_index, per_hundred_thousand)
@@ -239,11 +235,21 @@ function county_info(args){
         }
     };
 
-    function create_dropdowns(county_names, sliced_length){
+    function slice_data(arr) {
+        // Function for removing duplicate entries in the county data
+        // Reference: https://dev.to/pixari/what-is-the-best-solution-for-removing-duplicate-objects-from-an-array-4fe1
+        let arr_new = arr.map(e => JSON.stringify(e))
+        set_new = new Set(arr_new)
+        cleaned_arr = [...set_new]
+        cleaned = cleaned_arr.map(e => JSON.parse(e))
+        return cleaned
+    }
+
+    function create_dropdowns(county_names, sliced_features){
         // Loop through 1-3, get element by id for each dropdown content, each should have a button with arguments county name and row number
         for (i = 1; i < 4; i++) {
             var dropdown_content = "";
-            for (j = 0; j < sliced_length; j++) {
+            for (j = 0; j < sliced_features.length; j++) {
                 dropdown_content += "<button type=\"button\" onclick=county_info({row_num:" + 
                 i + ",county_name:\"" + county_names[j] + "\"})>" + county_names[j] + "</button>"
             }
@@ -292,6 +298,7 @@ function county_info(args){
     xmlhttp.open("GET", url, true);
     xmlhttp.send();
 }
+
 
 // Reference: https://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
 function numberWithCommas(x) {
