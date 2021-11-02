@@ -6,6 +6,10 @@ body {
   overflow: auto;
 }
 
+header {
+  text-align: center;
+}
+
 table {
   width: 100%;
 }
@@ -16,9 +20,18 @@ td, th {
     box-shadow: 2px rgba(0,0,0,0.2);
 }
 
+tr {
+  background-color: white;
+}
+
+tr:first-child{
+  background-color: black;
+  color: white;
+}
+
 section, div {
   padding: 10px 0;
-  text-align: center;
+  /* text-align: center; */
 }
 
 div {
@@ -41,6 +54,10 @@ header {
 .county-section {
   padding: 30px;
   background-color: #e9eae8;
+}
+
+.county-section div {
+  text-align: center;
 }
 
 h1 {
@@ -98,4 +115,6 @@ h1 {
     padding: 30px;
     font-size: large;
     font-weight: bold;
+    background-color: white;
+    text-align: center;
   }
