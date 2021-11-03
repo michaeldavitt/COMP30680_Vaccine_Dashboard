@@ -1,7 +1,8 @@
+
 // Part 1 & 2
 // Show weekly vaccination information and cumulative vaccination figures
 var weekly_features = "";
-var week_tracker = 0;
+var week_tracker = -1;
 
 // Get the JSON data
 var week_xmlhttp = new XMLHttpRequest();
@@ -38,7 +39,7 @@ function get_dropdown(){
         dropdown_content += "<button type=\"button\" onclick=vax_total(" + i + ")>Week " + i + " (" + dates[i] + ") </button>"
     }
 
-    document.getElementById("dropdown-content-week").innerHTML = dropdown_content
+    document.getElementById("dropdown-week").innerHTML = dropdown_content
 }
 
 // Generates a table containing vaccination information
@@ -61,11 +62,11 @@ function vax_total(user_week) {
 
     // Get the cumulative number vaccinated
     for (i = 0; i <= week_tracker; i++){
-        var attributes = weekly_features[i].attributes
+        var week = weekly_features[i]
+        var attributes = week.attributes
         total_vaccinated += attributes.TotalweeklyVaccines
     }
 
-    // Get vaccine data for this week only
     this_week = weekly_features[week_tracker].attributes
     var this_week_values = [this_week.TotalweeklyVaccines, this_week.Moderna, this_week.Pfizer, this_week.Janssen, this_week.AstraZeneca]
     text += "<tr align=center><td>" + numberWithCommas(total_vaccinated) + "</td>";
@@ -83,7 +84,9 @@ function vax_total(user_week) {
 }
 
 function by_age_cum() {
-    var age_text = "<table border=1 cellpadding=10>" + 
+    var age_text = "";
+
+    age_text += "<table border=1 cellpadding=10>" + 
     "<tr align=center>" + 
     "<th>10 - 19</th>" + 
     "<th>20 -29</th>" + 
@@ -118,7 +121,9 @@ function by_age_cum() {
 }
  
 function by_age_perc(){
-    var age_text = "<table border=1 cellpadding=10>" + 
+    var age_text = "";
+
+    age_text += "<table border=1 cellpadding=10>" + 
     "<tr align=center>" + 
     "<th>10 - 19</th>" + 
     "<th>20 -29</th>" + 
