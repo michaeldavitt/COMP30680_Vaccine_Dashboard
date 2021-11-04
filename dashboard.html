@@ -31,9 +31,9 @@
                 <div class="dropdown-content" id="dropdown-content-week"></div>
             </div>  
             <div id="Total_Vaccinated" class="table_wrapper"></div>
-            <h3>Vaccinations by Type</h3>
+            <h3>Vaccinations administered this week - by type</h3>
             <div id="Vacced_by_type" class="table_wrapper"></div>
-            <h3>Vaccinations by Age Range</h3>
+            <h3>Vaccinations by age range - <span id="cum-perc"></span></h3>
             <div id="button_wrapper">
                 <button type="button" onclick=by_age_cum()>Cumulative</button>
                 <button type="button" onclick=by_age_perc()>Percentage</button>
@@ -74,7 +74,6 @@
             <div class="table_wrapper">
                 <table cellpadding=10>
                     <tr>
-                        <th>County Number</th>
                         <th>County Name</th>
                         <th>County Population</th>
                         <th>Confirmed COVID cases</th>

@@ -92,6 +92,8 @@ function vax_total(user_week) {
 
 // Generates a table of weekly vaccine data, grouped by age range (cumulative figures)
 function by_age_cum() {
+    document.getElementById("cum-perc").innerHTML = "cumulative"
+
     var age_text = "<table border=1 cellpadding=10>" + 
     "<tr align=center>" + 
     "<th>10 - 19</th>" + 
@@ -129,6 +131,8 @@ function by_age_cum() {
 
 // Generates a table of weekly vaccine data, grouped by age range (cumulative figures)
 function by_age_perc(){
+    document.getElementById("cum-perc").innerHTML = "proportion fully vaccinated in each age group"
+
     var age_text = "<table border=1 cellpadding=10>" + 
     "<tr align=center>" + 
     "<th>10 - 19</th>" + 
@@ -187,6 +191,7 @@ var county_features = "";
 var county_names = Array();
 var per_hundred_thousand = Array()
 var selected_county_index = 0;
+var current_counties = Array(3)
 
 
 // Get the JSON data
@@ -260,22 +265,27 @@ function create_dropdowns(){
 function insert_data(args){
     row_num = args.row_num
     county_name = args.county_name
-    // Get the element by id using county_row_num
-    // Find the county's feature by looping through the features and storing the index when there's a match
-    // Then, find the rest of the data for that county and but it in a td inside the tr selected
-    var store_text = "";
-    var table_row_name = "county_" + row_num;
-    document.getElementById(table_row_name).innerHTML = "";
 
-    selected_county_index = get_county_index(county_name)
+    // If statement to prevent more than one row with the same data
+    if (!(current_counties.includes(county_name))){
+        current_counties[row_num - 1] = county_name
+        // Get the element by id using county_row_num
+        // Find the county's feature by looping through the features and storing the index when there's a match
+        // Then, find the rest of the data for that county and but it in a td inside the tr selected
+        var store_text = "";
+        var table_row_name = "county_" + row_num;
+        document.getElementById(table_row_name).innerHTML = "";
 
-    var info = county_features[selected_county_index].attributes;
-    var data = [row_num, info.CountyName, numberWithCommas(info.PopulationCensus16), numberWithCommas(info.ConfirmedCovidCases), per_hundred_thousand[selected_county_index]];
-    for (i = 0; i < data.length; i++){
-        store_text += "<td>" + data[i] + "</td>"
+        selected_county_index = get_county_index(county_name)
+
+        var info = county_features[selected_county_index].attributes;
+        var data = [info.CountyName, numberWithCommas(info.PopulationCensus16), numberWithCommas(info.ConfirmedCovidCases), per_hundred_thousand[selected_county_index]];
+        for (i = 0; i < data.length; i++){
+            store_text += "<td>" + data[i] + "</td>"
+        }
+            
+        document.getElementById(table_row_name).innerHTML = store_text;
     }
-        
-    document.getElementById(table_row_name).innerHTML = store_text;
 }
 
 function get_county_index(county_name){
