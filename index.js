@@ -1,5 +1,5 @@
 // Part 1 & 2
-// Show weekly vaccination information and cumulative vaccination figures
+// Global variables for storing information that will be used by the functions below
 var weekly_features = "";
 var week_tracker = 0;
 
@@ -20,10 +20,8 @@ week_xmlhttp.onreadystatechange = function() {
         // Create the dropdown menu
         get_dropdown()
         
-        // This condition evaluates to false when we don't want to repopulate the first table (vaccine types and totals)
+        // Get weekly vaccine data
         vax_total(week_tracker);
-
-        by_age_cum()
     }
 };
     
@@ -34,6 +32,7 @@ week_xmlhttp.send();
 // Generates a dropdown menu so that the user can select the week they require data for
 function get_dropdown(){
     var dropdown_content = "";
+    
     for (i = 0; i < weekly_features.length; i++) {
         dropdown_content += "<button type=\"button\" onclick=vax_total(" + i + ")>Week " + i + " (" + dates[i] + ") </button>"
     }
@@ -41,22 +40,17 @@ function get_dropdown(){
     document.getElementById("dropdown-content-week").innerHTML = dropdown_content
 }
 
-// Generates a table containing vaccination information
+// Generates a table containing weekly vaccination information (total vaccinations up to that point, weekly total, by vaccine type)
 function vax_total(user_week) {
     week_tracker = user_week
 
     var total_vaccinated = 0;
 
-    var text = "";
-
-    text += "<table border=1 cellpadding=10>" +
+    var text = "<h3>Week " + week_tracker + " (" + dates[week_tracker] + ")</h3>" +
+    "<table cellpadding=10>" +
     "<tr align=center>" + 
     "<th>Total Vaccinated (cumulative)</th>" + 
-    "<th>Total Vaccinated (this week)</th>" + 
-    "<th>Moderna</th>" + 
-    "<th>Pfizer</th>" +
-    "<th>Janssen</th>" + 
-    "<th>Astra Zenaca</th>" + 
+    "<th>Total Vaccinated (this week)</th>" +  
     "</tr>"
 
     // Get the cumulative number vaccinated
@@ -68,20 +62,35 @@ function vax_total(user_week) {
     // Get vaccine data for this week only
     this_week = weekly_features[week_tracker].attributes
     var this_week_values = [this_week.TotalweeklyVaccines, this_week.Moderna, this_week.Pfizer, this_week.Janssen, this_week.AstraZeneca]
-    text += "<tr align=center><td>" + numberWithCommas(total_vaccinated) + "</td>";
-
-    // Add the cumulative figures to the table
-    for (j = 0; j < this_week_values.length; j++){
-        text += "<td>" + numberWithCommas(this_week_values[j]) + "</td>"
-    }
-
+    text += "<tr align=center><td>" + numberWithCommas(total_vaccinated) + "</td>" + 
+    "<td>" + numberWithCommas(this_week_values[0]) + "</td>";
     text += "</tr></table>"
-    
+
     document.getElementById("Total_Vaccinated").innerHTML = text
 
+    var type_text = "<table cellpadding=10>" +
+    "<tr align=center>" + 
+    "<th>Moderna</th>" + 
+    "<th>Pfizer</th>" +
+    "<th>Janssen</th>" + 
+    "<th>Astra Zenaca</th>" + 
+    "</tr>"
+
+    // Add the type figures to the table
+    for (j = 1; j < this_week_values.length; j++){
+        type_text += "<td>" + numberWithCommas(this_week_values[j]) + "</td>"
+    }
+
+    type_text += "</tr></table>"
+    
+    document.getElementById("Vacced_by_type").innerHTML = type_text
+
+    // Get the weekly age range data (cumulative) for the specified week, so that you are not looking at information pertaining to a different week in the age-range table
     by_age_cum()
 }
 
+
+// Generates a table of weekly vaccine data, grouped by age range (cumulative figures)
 function by_age_cum() {
     var age_text = "<table border=1 cellpadding=10>" + 
     "<tr align=center>" + 
@@ -117,6 +126,8 @@ function by_age_cum() {
     document.getElementById("Vacced_by_age").innerHTML = age_text
 }
  
+
+// Generates a table of weekly vaccine data, grouped by age range (cumulative figures)
 function by_age_perc(){
     var age_text = "<table border=1 cellpadding=10>" + 
     "<tr align=center>" + 
