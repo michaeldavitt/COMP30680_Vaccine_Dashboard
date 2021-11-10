@@ -205,7 +205,7 @@ county_xmlhttp.onreadystatechange = function() {
         var parsedJSON = JSON.parse(county_xmlhttp.responseText);  
 
         
-        // Slice the features to account for duplicate entries (each county appears twice in the data)
+        // Slice the features to account for duplicate entries (each county appears more than once in the data)
         county_features = slice_data(parsedJSON.features)
 
         
