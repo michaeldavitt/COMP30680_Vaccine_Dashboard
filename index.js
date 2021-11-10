@@ -33,7 +33,7 @@ week_xmlhttp.send();
 function get_dropdown(){
     var dropdown_content = "";
     
-    for (i = 0; i < weekly_features.length; i++) {
+    for (i = 1; i < weekly_features.length; i++) {
         dropdown_content += "<button type=\"button\" onclick=vax_total(" + i + ")>Week " + i + " (" + dates[i] + ") </button>"
     }
 
@@ -54,7 +54,7 @@ function vax_total(user_week) {
     "</tr>"
 
     // Get the cumulative number vaccinated
-    for (i = 0; i <= week_tracker; i++){
+    for (i = 1; i <= week_tracker; i++){
         var attributes = weekly_features[i].attributes
         total_vaccinated += attributes.TotalweeklyVaccines
     }
