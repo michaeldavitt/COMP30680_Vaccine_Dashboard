@@ -1,6 +1,8 @@
 // Part 1 & 2
-// Global variables for storing information that will be used by the functions below
+// Variable where the parsed JSON features will be stored. Initialised with an empty string
 var weekly_features = "";
+
+// Variable that keeps track of the week number. Initialised with 0
 var week_tracker = 0;
 
 // Get the JSON data
@@ -33,6 +35,7 @@ week_xmlhttp.send();
 function get_dropdown(){
     var dropdown_content = "";
     
+    // Creates a week number and date range for each row in the dropdown menu
     for (i = 1; i < weekly_features.length; i++) {
         dropdown_content += "<button type=\"button\" onclick=vax_total(" + i + ")>Week " + i + " (" + dates[i] + ") </button>"
     }
@@ -42,33 +45,38 @@ function get_dropdown(){
 
 // Generates a table containing weekly vaccination information (total vaccinations up to that point, weekly total, by vaccine type)
 function vax_total(user_week) {
+    // Week_tracker represents the current week
     week_tracker = user_week
 
+    // Variable to keep track of the total number of people vaccinated from the start of 2021 up to the current week
     var total_vaccinated = 0;
 
     var text = "<h3>Week " + week_tracker + " (" + dates[week_tracker] + ")</h3>" +
-    "<table cellpadding=10>" +
+    "<table>" +
     "<tr align=center>" + 
     "<th>Total Vaccinated (cumulative)</th>" + 
     "<th>Total Vaccinated (this week)</th>" +  
     "</tr>"
 
-    // Get the cumulative number vaccinated
+    // Get the cumulative number vaccinated by looping through the weekly totals and adding each total to total_vaccinated
     for (i = 1; i <= week_tracker; i++){
         var attributes = weekly_features[i].attributes
         total_vaccinated += attributes.TotalweeklyVaccines
     }
 
-    // Get vaccine data for this week only
+    // Get vaccine data for this week only and store this data in an array
     this_week = weekly_features[week_tracker].attributes
     var this_week_values = [this_week.TotalweeklyVaccines, this_week.Moderna, this_week.Pfizer, this_week.Janssen, this_week.AstraZeneca]
+
+    // Set up first table, which will give the cumulative and weekly vaccination figures
     text += "<tr align=center><td>" + numberWithCommas(total_vaccinated) + "</td>" + 
     "<td>" + numberWithCommas(this_week_values[0]) + "</td>";
     text += "</tr></table>"
 
     document.getElementById("Total_Vaccinated").innerHTML = text
 
-    var type_text = "<table cellpadding=10>" +
+    // Set up second table, which will give the weekly vaccination figures, split by vaccine type (Moderna, Pfizer etc.)
+    var type_text = "<table>" +
     "<tr align=center>" + 
     "<th>Moderna</th>" + 
     "<th>Pfizer</th>" +
@@ -92,12 +100,15 @@ function vax_total(user_week) {
 
 // Generates a table of weekly vaccine data, grouped by age range (cumulative figures)
 function by_age_cum() {
+
+    // Change third table descriptor
     document.getElementById("cum-perc").innerHTML = "cumulative"
 
-    var age_text = "<table border=1 cellpadding=10>" + 
+    // Set up third table, which gives cumulative vaccination figures by age group
+    var age_text = "<table>" + 
     "<tr align=center>" + 
     "<th>10 - 19</th>" + 
-    "<th>20 -29</th>" + 
+    "<th>20 - 29</th>" + 
     "<th>30 - 39</th>" + 
     "<th>40 - 49</th>" +
     "<th>50 - 59</th>" + 
@@ -131,12 +142,15 @@ function by_age_cum() {
 
 // Generates a table of weekly vaccine data, grouped by age range (cumulative figures)
 function by_age_perc(){
+
+    // Change third table descriptor
     document.getElementById("cum-perc").innerHTML = "proportion fully vaccinated in each age group"
 
-    var age_text = "<table border=1 cellpadding=10>" + 
+    // Set up third table, which gives cumulative vaccination figures by age group
+    var age_text = "<table>" + 
     "<tr align=center>" + 
     "<th>10 - 19</th>" + 
-    "<th>20 -29</th>" + 
+    "<th>20 - 29</th>" + 
     "<th>30 - 39</th>" + 
     "<th>40 - 49</th>" +
     "<th>50 - 59</th>" + 
@@ -186,11 +200,14 @@ function by_age_perc(){
 // Show weekly vaccination information and cumulative vaccination figures
 var county_features = "";
 
-// Get a list of county names and cases per 100000
-// Also get the index of the county provided as an argument to the function
+// Array of county names and cases per 100000
 var county_names = Array();
 var per_hundred_thousand = Array()
+
+// Variable to identify the index of the user-selected county. Initialised at 0
 var selected_county_index = 0;
+
+// Array to keep track of which counties are currently being displayed on the dashboard
 var current_counties = Array(3)
 
 
@@ -213,9 +230,15 @@ county_xmlhttp.onreadystatechange = function() {
         counties_and_cases()    
 
 
-        // Create dropdown menus 
+        // Create dropdown menus to allow the user to select specific counties for comparison
         create_dropdowns()
-            
+
+        
+        // Insert the first three counties. These will be displayed on the dashboard by default when the user enters the site
+        insert_data({row_num:1,county_name:county_names[0]})
+        insert_data({row_num:2,county_name:county_names[1]})
+        insert_data({row_num:3,county_name:county_names[2]})
+
 
         // Get highest number of cases per 10000 people
         get_max()
@@ -230,8 +253,8 @@ county_xmlhttp.onreadystatechange = function() {
 county_xmlhttp.open("GET", county_url, true);
 county_xmlhttp.send();
 
+// Removes duplicate entries in the county data
 function slice_data(arr) {
-    // Function for removing duplicate entries in the county data
     // Reference: https://dev.to/pixari/what-is-the-best-solution-for-removing-duplicate-objects-from-an-array-4fe1
     let arr_new = arr.map(e => JSON.stringify(e))
     set_new = new Set(arr_new)
@@ -240,44 +263,61 @@ function slice_data(arr) {
     return cleaned
 }
 
+
+// Get an array of counties and cases per 100000 people
+// These arrays will be important in part 4, where we need to get the county with the highest cases per 100000 and the lowest
 function counties_and_cases(){
     for (i = 0; i < county_features.length; i++){
         var attributes = county_features[i].attributes
+
+        // Add the county names to the county_names array
         county_names.push(attributes.CountyName)
+
+        // Add the cases per 100000 to the per_hundred_thousand array
         per_hundred_thousand.push( Math.round( (attributes.PopulationProportionCovidCases + Number.EPSILON) * 100 ) / 100 )
     }
 }
 
+
+// Creates three dropdown menus to enable the user to select three counties for comparison
 function create_dropdowns(){
-    // Loop through 1-3, get element by id for each dropdown content, each should have a button with arguments county name and row number
+
+    // Each iteration of the loop corresponds to one of the dropdown menus
     for (i = 1; i < 4; i++) {
         var dropdown_content = "";
+
+        // Create a seperate row in the dropdown menu for each county
         for (j = 0; j < county_features.length; j++) {
             dropdown_content += "<button type=\"button\" onclick=insert_data({row_num:" + 
             i + ",county_name:\"" + county_names[j] + "\"})>" + county_names[j] + "</button>"
         }
 
+        // Put the dropdown menu in the element with id=dropdown_county_i, where i corresponds to the dropdown menu number
         var row_name = "dropdown_county_" + i
         document.getElementById(row_name).innerHTML = dropdown_content;
     }
 }
 
+
+// Insert a county row into the counties table in the dashboard
+// This function will be called three times at the start to display the first three counties by default
 function insert_data(args){
     row_num = args.row_num
     county_name = args.county_name
 
-    // If statement to prevent more than one row with the same data
+    // If statement to prevent more than one row with the same data appearing on the dashboard
     if (!(current_counties.includes(county_name))){
+
+        // Overwrite the current county in the row specified by row_num
         current_counties[row_num - 1] = county_name
-        // Get the element by id using county_row_num
-        // Find the county's feature by looping through the features and storing the index when there's a match
-        // Then, find the rest of the data for that county and but it in a td inside the tr selected
         var store_text = "";
         var table_row_name = "county_" + row_num;
         document.getElementById(table_row_name).innerHTML = "";
 
+        // Get the index of the county specified by the user
         selected_county_index = get_county_index(county_name)
 
+        // Extract the features for that particular county and put them into the dashboard
         var info = county_features[selected_county_index].attributes;
         var data = [info.CountyName, numberWithCommas(info.PopulationCensus16), numberWithCommas(info.ConfirmedCovidCases), per_hundred_thousand[selected_county_index]];
         for (i = 0; i < data.length; i++){
@@ -288,6 +328,8 @@ function insert_data(args){
     }
 }
 
+// Gets the index of the county specified by the user
+// Used in the insert data function to isolate the row of the county specified by the user
 function get_county_index(county_name){
     for (i=0; i<county_names.length; i++){
         if (county_names[i] === county_name){
@@ -296,7 +338,11 @@ function get_county_index(county_name){
     }
 }
 
+
+// Get county with the highest cases per 100000
 function get_max(){
+
+    // Get the highest value per 100000, then get the index of this value, then get the county name using this index
     var max_value = Math.max(...per_hundred_thousand)
     var max_index = per_hundred_thousand.indexOf(max_value)
     var max_county = county_names[max_index]
@@ -304,7 +350,11 @@ function get_max(){
     document.getElementById("max_county").innerHTML = max_county + " (" + max_value + " cases per 100,000 people)"
 }
 
+
+// Get county with the lowest cases per 100000
 function get_min(){
+
+    // Get the highest value per 100000, then get the index of this value, then get the county name using this index
     var min_value = Math.min(...per_hundred_thousand)
     var min_index = per_hundred_thousand.indexOf(min_value)
     var min_county = county_names[min_index]
@@ -313,6 +363,7 @@ function get_min(){
 }
 
 
+// Convert numbers into numbers with commas for presentation purposes
 // Reference: https://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
 function numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");

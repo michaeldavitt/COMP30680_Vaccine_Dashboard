@@ -2,6 +2,7 @@ body {
   background-color: #f5f5f5;
 }
 
+/* Ensures that tables overflow if the screen width is small */
 .table_wrapper {
   overflow: auto;
 }
@@ -10,6 +11,7 @@ header {
   text-align: center;
 }
 
+/* Ensures that tables span the entire width of the site */
 table {
   width: 100%;
 }
@@ -19,20 +21,22 @@ td, th {
     text-align: center;
     box-shadow: 2px rgba(0,0,0,0.2);
     font-size: 20px;
+    padding: 10px;
 }
 
 tr {
   background-color: white;
 }
 
+/* Table style applied only to table headings */
 tr:first-child{
   background-color: black;
   color: white;
 }
 
+/* Ensures that tables aren't too bunched up */
 section, div {
-  padding: 10px 0;
-  /* text-align: center; */
+  padding: 15px 0;
 }
 
 div {
@@ -104,4 +108,8 @@ h1 {
     font-weight: bold;
     background-color: white;
     text-align: center;
+  }
+
+  .week-section .dropdown-content {
+    width: 400%;
   }
