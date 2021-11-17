@@ -45,6 +45,7 @@ function get_dropdown(){
 
 // Generates a table containing weekly vaccination information (total vaccinations up to that point, weekly total, by vaccine type)
 function vax_total(user_week) {
+    
     // Week_tracker represents the current week
     week_tracker = user_week
 
@@ -315,7 +316,7 @@ function insert_data(args){
         document.getElementById(table_row_name).innerHTML = "";
 
         // Get the index of the county specified by the user
-        selected_county_index = get_county_index(county_name)
+        selected_county_index = county_names.indexOf(county_name)
 
         // Extract the features for that particular county and put them into the dashboard
         var info = county_features[selected_county_index].attributes;
@@ -325,16 +326,6 @@ function insert_data(args){
         }
             
         document.getElementById(table_row_name).innerHTML = store_text;
-    }
-}
-
-// Gets the index of the county specified by the user
-// Used in the insert data function to isolate the row of the county specified by the user
-function get_county_index(county_name){
-    for (i=0; i<county_names.length; i++){
-        if (county_names[i] === county_name){
-            return i;
-        }
     }
 }
 
@@ -366,7 +357,7 @@ function get_min(){
 // Convert numbers into numbers with commas for presentation purposes
 // Reference: https://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
 function numberWithCommas(x) {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 }
 
 
