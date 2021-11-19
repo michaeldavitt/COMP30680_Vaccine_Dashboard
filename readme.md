@@ -4,7 +4,7 @@
 This assignment required us to create a webpage that displays COVID-19 information obtained via Ireland's COVID-19 Data Hub. The purpose of this readme file is to describe how I have designed the solution to this problem. For more detailed implementation details, please refer to the comments included in index.js and dashboard.html.
 
 ## Dashboard.html
-Dashboard.html is split into two sections. In the first section, vaccination data is displayed. The user has the option to select vaccination information for a specific week. This section also includes the total number of people fully vaccinated in each age group, and the user is able to choose whether this information is presented as a total number or as a percentage within the age group. Importantly, the user does not need to reload the site in order to access this information. 
+Dashboard.html is split into two sections. In the first section, vaccination data is displayed. The user has the option to select vaccination information for a specific week. This section also includes the total number of people fully vaccinated in each age group. The user is able to choose whether this information is presented as a total number or as a percentage within the age group. Importantly, the user does not need to reload the site in order to access new information. 
 
 There are a number of div elements in this section belonging to class = "table-wrapper". Data from index.js will be read into these div elements as soon as the user opens the page. The same is true for the div element belonging to class = "dropdown-content". Data is inserted using document.getElementById("id").innerHTML = new_content in the index.js file.
 
